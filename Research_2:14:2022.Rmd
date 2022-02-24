@@ -1,0 +1,28 @@
+---
+title: "Research_2/14/2022"
+author: "Grace Rade"
+date: "2/14/2022"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(readxl)
+library(rio)
+library(dplyr)
+life_exp <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRoERC6gWPv7UHNS2PUUtdn4vPsrdbzcrETd9ID65i9bQQSAL73cN1m00n-ccsK_A/pub?gid=2033521907&single=true&output=csv") 
+
+life_exp2 <- read_excel("Downloads/life_exp2.xlsx")
+
+
+
+health_data <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSVYwtghis2vYeGKc7l0UEe6RvYXRAcV4pyDjzcNSC_Aww1LSprHdTB9sSoqM3A-G2O47ykypq4BUOP/pub?gid=0&single=true&output=csv") 
+```
+
+```{r}
+health_data3 <- merge(life_exp2, health_data, all = TRUE)
+```
+
+```{r}
+export(health_data3, "health_data3.csv")
+```
+
