@@ -60,4 +60,4 @@ all_mort <- black_mort %>%
 export(all_mort, file = 'all_mort.csv')
 ```
 
-Mortality Data (CDC Wonder)
+Mortality Data (CDC Wonder) 
