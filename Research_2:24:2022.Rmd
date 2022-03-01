@@ -1,0 +1,24 @@
+---
+title: "Research_2/24"
+author: "Grace Rade"
+date: "2/24/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rio)
+library(readr)
+```
+
+```{r}
+mort_rates <- read.delim("comp_mort_1999-20162.txt")
+```
+
+```{r}
+mort_life_exp <- mort_rates %>%
+  group_by(Year.Code, State, Age.Group, Gender, Race) %>% 
+  summarise(Rate = (as.numeric(Deaths)/as.numeric(Population)) *100000, Num = (as.numeric(Population) - as.numeric(Deaths)))
+```
+
+("https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandlifeexpectancies/methodologies/guidetocalculatingnationallifetables")[calculating life expectancy]
