@@ -1,0 +1,68 @@
+---
+title: "Research 3/2/2022"
+author: "Grace Rade"
+date: "3/2/2022"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(rio)
+```
+
+```{r}
+mort_data <- read.delim("CompressedMortality1979-1998.txt")
+all_mort <- import("all_mort.csv")
+```
+
+```{r}
+black_male_mort <- mort_data %>% 
+  filter(Race == "Black or African American", Gender.Code =="M") %>% 
+  group_by(State, Year) %>% 
+  summarise(black_male_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+black_female_mort <- mort_data %>% 
+  filter(Race == "Black or African American", Gender.Code =="F") %>% 
+  group_by(State, Year) %>% 
+  summarise(black_female_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+white_male_mort <- mort_data %>% 
+  filter(Race == "White", Gender.Code == "M") %>% 
+  group_by(State, Year) %>% 
+  summarise(white_male_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+white_female_mort <- mort_data %>% 
+  filter(Race == "White", Gender.Code == "F") %>% 
+  group_by(State, Year) %>% 
+  summarise(white_female_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+black_mort <- black_male_mort %>% 
+  left_join(black_female_mort, by = c("State", "Year"))
+```
+
+```{r}
+white_mort <- white_male_mort %>% 
+  left_join(white_female_mort, by = c("State", "Year"))
+```
+
+```{r}
+all_mort2 <- black_mort %>% 
+  left_join(white_mort, by = c("State", "Year"))
+```
+
+```{r}
+all_mort3 <- all_mort2 %>% 
+  full_join(all_mort, by = c("State", "Year", "black_male_mortality", "black_female_mortality", "white_male_mortality", "white_female_mortality"))
+```
+
+```{r}
+export(all_mort3, "all_mort2.csv")
+```
+
