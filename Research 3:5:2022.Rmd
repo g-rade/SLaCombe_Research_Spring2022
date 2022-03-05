@@ -1,0 +1,16 @@
+---
+title: "Research 3/5/2022"
+author: "Grace Rade"
+date: "3/5/2022"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(rio)
+```
+
+```{r}
+mort_1979 <- import("CompressedMortality1979_1998_22.txt")
+mort_1999 <- import("CompressedMortality1999_2016_2copy2.txt")
+```
+
