@@ -12,5 +12,29 @@ library(rio)
 ```{r}
 mort_1979 <- import("CompressedMortality1979_1998_22.txt")
 mort_1999 <- import("CompressedMortality1999_2016_2copy2.txt")
+mort_hispanic <- read.delim("Compressed Mortality, 1999-2016copy.txt") %>% filter(Hispanic.Origin == "Hispanic or Latino")
+```
+
+```{r}
+mort_1979_1999 <- mort_1979 %>% 
+  left_join(mort_1999, by = c("State", "Year", "Population")) %>% 
+    select(State, Year, Population)
+```
+
+```{r}
+mort_1979_race <-  read.delim("CompressedMortality1979-1998.txt")
+mort_1999_race <- read.delim("CompressedMortality_1999_2016.txt")
+
+mort_race <- mort_1979_race %>% 
+  full_join(mort_1999_race, by = c("State", "Year", "Deaths", "Race", "Gender.Code")) %>%
+  select(State, Year, Race, Gender.Code, Deaths)
+```
+
+```{r}
+full_pop_mort <- mort_race %>% 
+  left_join(mort_1979_1999, by = c("State", "Year")) %>% 
+  group_by(State, Race, Gender.Code, Year) %>% 
+  mutate(Rate = (Deaths/Population) * 100000) %>% 
+  filter(Race == "Black or African American" | Race == "White")
 ```
 
