@@ -105,3 +105,7 @@ full_mort_1979_1999 <- full_mort_1979_1999 %>%
   full_join(white_mort, by = c("State", "Year"))
 ```
 
+```{r}
+export(full_mort_1979_1999, "full_mort_79_99.csv")
+```
+
