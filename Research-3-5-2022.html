@@ -189,21 +189,66 @@ pre code {
 <pre><code>## Warning in (function (input = &quot;&quot;, file = NULL, text = NULL, cmd = NULL, :
 ## Stopped early on line 972. Expected 8 fields but found 1. Consider fill=TRUE and
 ## comment.char=. First discarded non-empty line: &lt;&lt;&quot;---&quot;&gt;&gt;</code></pre>
-<pre class="r"><code>mort_hispanic &lt;- read.delim(&quot;Compressed Mortality, 1999-2016copy.txt&quot;) %&gt;% filter(Hispanic.Origin == &quot;Hispanic or Latino&quot;)</code></pre>
+<pre class="r"><code>mort_hispanic &lt;- read.delim(&quot;Compressed Mortality, 1999-2016copy.txt&quot;) %&gt;% 
+  filter(Hispanic.Origin == &quot;Hispanic or Latino&quot;) %&gt;% 
+  rename(Race = Hispanic.Origin, Race.Code = Hispanic.Origin.Code)</code></pre>
 <pre class="r"><code>mort_1979_1999 &lt;- mort_1979 %&gt;% 
-  left_join(mort_1999, by = c(&quot;State&quot;, &quot;Year&quot;, &quot;Population&quot;)) %&gt;% 
-    select(State, Year, Population)</code></pre>
+  full_join(mort_1999, by = c(&quot;State&quot;, &quot;Year&quot;, &quot;Population&quot;))</code></pre>
 <pre class="r"><code>mort_1979_race &lt;-  read.delim(&quot;CompressedMortality1979-1998.txt&quot;)
 mort_1999_race &lt;- read.delim(&quot;CompressedMortality_1999_2016.txt&quot;)
 
 mort_race &lt;- mort_1979_race %&gt;% 
-  full_join(mort_1999_race, by = c(&quot;State&quot;, &quot;Year&quot;, &quot;Deaths&quot;, &quot;Race&quot;, &quot;Gender.Code&quot;)) %&gt;%
-  select(State, Year, Race, Gender.Code, Deaths)</code></pre>
-<pre class="r"><code>full_pop_mort &lt;- mort_race %&gt;% 
+  full_join(mort_1999_race, by = c(&quot;State&quot;, &quot;Year&quot;, &quot;Deaths&quot;, &quot;Race&quot;, &quot;Gender.Code&quot;, &quot;Race.Code&quot;)) 
+
+mort_race &lt;- mort_race %&gt;% 
+  full_join(mort_hispanic, by = c(&quot;State&quot;, &quot;Year&quot;, &quot;Deaths&quot;, &quot;Race&quot;, &quot;Gender.Code&quot;, &quot;Race.Code&quot;)) %&gt;% 
+  filter(Race == &quot;White&quot; | Race == &quot;Black or African American&quot; | Race == &quot;Hispanic or Latino&quot;)
+
+mort_race &lt;- mort_race %&gt;% 
+  select(Race, State, Year, Gender.Code, Deaths) %&gt;% 
   left_join(mort_1979_1999, by = c(&quot;State&quot;, &quot;Year&quot;)) %&gt;% 
-  group_by(State, Race, Gender.Code, Year) %&gt;% 
-  mutate(Rate = (Deaths/Population) * 100000) %&gt;% 
-  filter(Race == &quot;Black or African American&quot; | Race == &quot;White&quot;)</code></pre>
+  select(State, Year, Gender.Code, Deaths, Population, Race)</code></pre>
+<pre class="r"><code>black_male_mort &lt;- mort_race %&gt;% 
+  filter(Race == &quot;Black or African American&quot;, Gender.Code == &quot;M&quot;) %&gt;% 
+  group_by(State, Year) %&gt;% 
+  summarise(black_male_mortality = (Deaths/Population) * 100000)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>black_female_mort &lt;- mort_race %&gt;% 
+  filter(Race == &quot;Black or African American&quot;, Gender.Code == &quot;F&quot;) %&gt;% 
+  group_by(State, Year) %&gt;% 
+  summarise(black_female_mortality = (Deaths/Population) * 100000)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>black_mort &lt;- black_male_mort %&gt;% 
+  full_join(black_female_mort, by = c(&quot;Year&quot;, &quot;State&quot;))</code></pre>
+<pre class="r"><code>hispanic_male_mort &lt;- mort_race %&gt;% 
+  filter(Race == &quot;Hispanic or Latino&quot;, Gender.Code == &quot;M&quot;) %&gt;% 
+  group_by(State, Year) %&gt;% 
+  summarise(hispanic_male_mortality = ((Deaths/Population) * 100000))</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>hispanic_female_mort &lt;- mort_race %&gt;% 
+  filter(Race == &quot;Hispanic or Latino&quot;, Gender.Code == &quot;F&quot;) %&gt;% 
+  group_by(State, Year) %&gt;% 
+  summarise(hispanic_female_mortality = (Deaths/Population) * 100000)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>hispanic_mort &lt;- hispanic_male_mort %&gt;% 
+  full_join(hispanic_female_mort, by = c(&quot;State&quot;, &quot;Year&quot;))</code></pre>
+<pre class="r"><code>white_male_mort &lt;- mort_race %&gt;% 
+  filter(Race == &quot;White&quot;, Gender.Code == &quot;M&quot;) %&gt;% 
+  group_by(State, Year) %&gt;%
+  summarise(white_male_mortality = (Deaths/Population) * 100000)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>white_female_mort &lt;- mort_race %&gt;%
+  filter(Race == &quot;White&quot;, Gender.Code == &quot;F&quot;) %&gt;% 
+  group_by(State, Year) %&gt;%
+  summarise(white_female_mrtality = (Deaths/Population) * 100000)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;State&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>white_mort &lt;- white_male_mort %&gt;% 
+  full_join(white_female_mort, by = c(&quot;State&quot;, &quot;Year&quot;))</code></pre>
+<pre class="r"><code>full_mort_1979_1999 &lt;- black_mort %&gt;%
+  full_join(hispanic_mort, by = c(&quot;State&quot;, &quot;Year&quot;))
+
+full_mort_1979_1999 &lt;- full_mort_1979_1999 %&gt;%
+  full_join(white_mort, by = c(&quot;State&quot;, &quot;Year&quot;))</code></pre>
 
 
 
