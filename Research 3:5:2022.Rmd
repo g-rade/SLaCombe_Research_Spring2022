@@ -12,13 +12,14 @@ library(rio)
 ```{r}
 mort_1979 <- import("CompressedMortality1979_1998_22.txt")
 mort_1999 <- import("CompressedMortality1999_2016_2copy2.txt")
-mort_hispanic <- read.delim("Compressed Mortality, 1999-2016copy.txt") %>% filter(Hispanic.Origin == "Hispanic or Latino")
+mort_hispanic <- read.delim("Compressed Mortality, 1999-2016copy.txt") %>% 
+  filter(Hispanic.Origin == "Hispanic or Latino") %>% 
+  rename(Race = Hispanic.Origin, Race.Code = Hispanic.Origin.Code)
 ```
 
 ```{r}
 mort_1979_1999 <- mort_1979 %>% 
-  left_join(mort_1999, by = c("State", "Year", "Population")) %>% 
-    select(State, Year, Population)
+  full_join(mort_1999, by = c("State", "Year", "Population"))
 ```
 
 ```{r}
@@ -26,15 +27,81 @@ mort_1979_race <-  read.delim("CompressedMortality1979-1998.txt")
 mort_1999_race <- read.delim("CompressedMortality_1999_2016.txt")
 
 mort_race <- mort_1979_race %>% 
-  full_join(mort_1999_race, by = c("State", "Year", "Deaths", "Race", "Gender.Code")) %>%
-  select(State, Year, Race, Gender.Code, Deaths)
+  full_join(mort_1999_race, by = c("State", "Year", "Deaths", "Race", "Gender.Code", "Race.Code")) 
+
+mort_race <- mort_race %>% 
+  full_join(mort_hispanic, by = c("State", "Year", "Deaths", "Race", "Gender.Code", "Race.Code")) %>% 
+  filter(Race == "White" | Race == "Black or African American" | Race == "Hispanic or Latino")
+
+mort_race <- mort_race %>% 
+  select(Race, State, Year, Gender.Code, Deaths) %>% 
+  left_join(mort_1979_1999, by = c("State", "Year")) %>% 
+  select(State, Year, Gender.Code, Deaths, Population, Race)
+
 ```
 
 ```{r}
-full_pop_mort <- mort_race %>% 
-  left_join(mort_1979_1999, by = c("State", "Year")) %>% 
-  group_by(State, Race, Gender.Code, Year) %>% 
-  mutate(Rate = (Deaths/Population) * 100000) %>% 
-  filter(Race == "Black or African American" | Race == "White")
+black_male_mort <- mort_race %>% 
+  filter(Race == "Black or African American", Gender.Code == "M") %>% 
+  group_by(State, Year) %>% 
+  summarise(black_male_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+black_female_mort <- mort_race %>% 
+  filter(Race == "Black or African American", Gender.Code == "F") %>% 
+  group_by(State, Year) %>% 
+  summarise(black_female_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+black_mort <- black_male_mort %>% 
+  full_join(black_female_mort, by = c("Year", "State"))
+```
+
+```{r}
+hispanic_male_mort <- mort_race %>% 
+  filter(Race == "Hispanic or Latino", Gender.Code == "M") %>% 
+  group_by(State, Year) %>% 
+  summarise(hispanic_male_mortality = ((Deaths/Population) * 100000))
+```
+
+```{r}
+hispanic_female_mort <- mort_race %>% 
+  filter(Race == "Hispanic or Latino", Gender.Code == "F") %>% 
+  group_by(State, Year) %>% 
+  summarise(hispanic_female_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+hispanic_mort <- hispanic_male_mort %>% 
+  full_join(hispanic_female_mort, by = c("State", "Year"))
+```
+
+```{r}
+white_male_mort <- mort_race %>% 
+  filter(Race == "White", Gender.Code == "M") %>% 
+  group_by(State, Year) %>%
+  summarise(white_male_mortality = (Deaths/Population) * 100000)
+```
+
+```{r}
+white_female_mort <- mort_race %>%
+  filter(Race == "White", Gender.Code == "F") %>% 
+  group_by(State, Year) %>%
+  summarise(white_female_mrtality = (Deaths/Population) * 100000)
+```
+
+```{r}
+white_mort <- white_male_mort %>% 
+  full_join(white_female_mort, by = c("State", "Year"))
+```
+
+```{r}
+full_mort_1979_1999 <- black_mort %>%
+  full_join(hispanic_mort, by = c("State", "Year"))
+
+full_mort_1979_1999 <- full_mort_1979_1999 %>%
+  full_join(white_mort, by = c("State", "Year"))
 ```
 
