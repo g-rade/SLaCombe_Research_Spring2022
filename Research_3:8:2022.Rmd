@@ -1,0 +1,21 @@
+---
+title: "Research 3/8/2022"
+author: "Grace Rade"
+date: "3/8/2022"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(rio)
+```
+
+```{r}
+mort_1979 <- import("CompressedMortality1979_1998_22.txt")
+mort_1999 <- import("CompressedMortality1999_2016_2copy2.txt")
+mort_hispanic <- read.delim("Compressed Mortality, 1999-2016copy.txt") %>% 
+  filter(Hispanic.Origin == "Hispanic or Latino") %>% 
+  rename(Race = Hispanic.Origin, Race.Code = Hispanic.Origin.Code)
+mort_1979_race <-  read.delim("CompressedMortality1979-1998.txt")
+mort_1999_race <- read.delim("CompressedMortality_1999_2016.txt")
+```
+
