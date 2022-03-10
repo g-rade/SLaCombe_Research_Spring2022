@@ -9,6 +9,7 @@ library(tidyverse)
 library(rio)
 ```
 
+# Load data sets
 ```{r}
 mort_1979 <- import("CompressedMortality1979_1998_22.txt")
 mort_1999 <- import("CompressedMortality1999_2016_2copy2.txt")
@@ -17,11 +18,13 @@ mort_hispanic <- read.delim("Compressed Mortality, 1999-2016copy.txt") %>%
   rename(Race = Hispanic.Origin, Race.Code = Hispanic.Origin.Code)
 ```
 
+#Join the two datasets for total state population
 ```{r}
 mort_1979_1999 <- mort_1979 %>% 
   full_join(mort_1999, by = c("State", "Year", "Population"))
 ```
 
+#Join the two datasets for deaths by race
 ```{r}
 mort_1979_race <-  read.delim("CompressedMortality1979-1998.txt")
 mort_1999_race <- read.delim("CompressedMortality_1999_2016.txt")
@@ -40,6 +43,7 @@ mort_race <- mort_race %>%
 
 ```
 
+#Calcualte mortality variables by race and sex
 ```{r}
 black_male_mort <- mort_race %>% 
   filter(Race == "Black or African American", Gender.Code == "M") %>% 
@@ -97,6 +101,7 @@ white_mort <- white_male_mort %>%
   full_join(white_female_mort, by = c("State", "Year"))
 ```
 
+#Join everything together
 ```{r}
 full_mort_1979_1999 <- black_mort %>%
   full_join(hispanic_mort, by = c("State", "Year"))

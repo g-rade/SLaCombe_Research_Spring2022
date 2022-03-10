@@ -57,27 +57,27 @@ mort_state_race <- mort_race %>%
 black_male_mort <- mort_state_race %>% 
   filter(Race == "Black or African American", Gender.Code == "M") %>% 
   group_by(State, Year) %>% 
-  summarise(population_porportion = (Group_Population/State_Population), black_male_mortality = (Deaths/State_Population * 100000), black_male_mortality_weighted = black_male_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), black_male_mortality = (Deaths/State_Population * 100000), black_male_mortality_weighted = black_male_mortality/population_proportion)
 ```
 
 ```{r}
 black_female_mort <- mort_state_race %>% 
   filter(Race == "Black or African American", Gender.Code == "F") %>% 
   group_by(State, Year) %>% 
-  summarise(population_porportion = (Group_Population/State_Population), black_female_mortality = (Deaths/State_Population * 100000), black_female_mortality_weighted = black_female_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), black_female_mortality = (Deaths/State_Population * 100000), black_female_mortality_weighted = black_female_mortality/population_proportion)
 ```
 
 # Hispanic mortality
 ```{r}
-hispaanic_male_mortality <- mort_state_race %>% 
+hispanic_male_mort <- mort_state_race %>% 
   filter(Race == "Hispanic or Latino", Gender.Code == "M") %>% group_by(State, Year) %>% 
-  summarise(population_porportion = (Group_Population/State_Population), hispanic_male_mortality = (Deaths/State_Population * 100000), hispanic_male_mortality_weighted = hispanic_male_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), hispanic_male_mortality = (Deaths/State_Population * 100000), hispanic_male_mortality_weighted = hispanic_male_mortality/population_proportion)
 ```
 
 ```{r}
-hispaanic_female_mort <- mort_state_race %>% 
+hispanic_female_mort <- mort_state_race %>% 
   filter(Race == "Hispanic or Latino", Gender.Code == "F") %>% group_by(State, Year) %>% 
-  summarise(population_porportion = (Group_Population/State_Population), hispanic_female_mortality = (Deaths/State_Population * 100000), hispanic_female_mortality_weighted = hispanic_female_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), hispanic_female_mortality = (Deaths/State_Population * 100000), hispanic_female_mortality_weighted = hispanic_female_mortality/population_proportion)
 ```
 
 # White mortality
@@ -85,20 +85,44 @@ hispaanic_female_mort <- mort_state_race %>%
 white_male_mort <- mort_state_race %>% 
   filter(Race == "White", Gender.Code == "M") %>% 
   group_by(State, Year) %>%
-  summarise(population_porportion = (Group_Population/State_Population), white_male_mortality = (Deaths/State_Population * 100000), white_male_mortality_weighted = white_male_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), white_male_mortality = (Deaths/State_Population * 100000), white_male_mortality_weighted = white_male_mortality/population_proportion)
 ```
 
 ```{r}
 white_female_mort <- mort_state_race %>% 
   filter(Race == "White", Gender.Code == "F") %>% 
   group_by(State, Year) %>%
-  summarise(population_porportion = (Group_Population/State_Population), white_female_mortality = (Deaths/State_Population * 100000), white_female_mortality_weighted = white_female_mortality/population_porportion)
+  summarise(population_proportion = (Group_Population/State_Population), white_female_mortality = (Deaths/State_Population * 100000), white_female_mortality_weighted = white_female_mortality/population_proportion)
 ```
 
 # Join all the data frames together for a master dataset 
 ```{r}
 white_mort <- white_female_mort %>% 
-  full_join(white_male_mort, by = c("Year", "State", "population_porportion")
+  full_join(white_male_mort, by = c("Year", "State")) %>% 
+  select(-population_proportion.x, -population_proportion.y)
 ```
 
-The joined date frame is being weird and not joining by year even though they are the same so it's all stacked on top of each other 
+```{r}
+black_mort <- black_male_mort %>% 
+  full_join(black_female_mort, by = c("Year", "State")) %>% 
+  select(-population_proportion.x, -population_proportion.y)
+```
+
+```{r}
+hispanic_mort <- hispanic_male_mort %>% 
+  full_join(hispanic_female_mort, c("Year", "State")) %>% 
+  select(-population_proportion.x, -population_proportion.y)
+```
+
+```{r}
+full_mort_weighted <- black_mort %>% 
+  full_join(hispanic_mort, by = c("State", "Year"))
+
+full_mort_weighted <- full_mort_weighted %>% 
+  full_join(white_mort, by = c("State", "Year"))
+```
+
+```{r}
+export(full_mort_weighted, "full_mort_weighted.csv")
+```
+
