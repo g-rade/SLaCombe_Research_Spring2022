@@ -123,6 +123,6 @@ full_mort_weighted <- full_mort_weighted %>%
 ```
 
 ```{r}
-export(full_mort_weighted, "full_mort_weighted.csv")
+export(full_mort_weighted, "full_mort_weighted2.csv")
 ```
 
