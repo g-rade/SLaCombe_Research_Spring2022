@@ -5,7 +5,7 @@
 
 2/14/2022: merging health datasets (life_exp.xls)
 
-2/24/2022: trying to calcualte life expectancy
+2/24/2022: trying to calculate life expectancy
 
 3/1/2022: mortality rates from CDC Wonder 1999-2016
 
