@@ -15,7 +15,7 @@
 
 3/8/2022: weighted mortality rates from CDC Wonder
 
-Spring Break Research: palying around with different weights for mortality rates
+Spring Break Research: playing around with different weights for mortality rates
 
 
 
