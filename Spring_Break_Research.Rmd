@@ -41,7 +41,7 @@ mort_state_race <- mort_race %>%
   rename(Group_Deaths = Deaths)
 ```
 
-#Same methods as before but this time do a different stat to weight by (deaths proportion = (group deaths/state deaths))
+#Same methods as before but this time do a different stat to weight by (deaths proportion = (group deaths/state deaths)), keeping the old weighted mortality rate though
 ```{r}
 # Black mortality
 
@@ -55,26 +55,53 @@ black_female_mort <- mort_state_race %>%
   group_by(State, Year) %>% 
   mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), black_female_mortality = (Group_Deaths/State_Population * 100000), black_female_mortality_weighted = black_female_mortality/population_proportion, black_female_mortality_weighted2 = black_female_mortality*deaths_proportion)
 
-blac_mort <- black_male_mort %>% 
-  full_join(black_female_mort, by = c("State", "Year"))
+black_mort <- black_male_mort %>% 
+  full_join(black_female_mort, by = c("State", "Year", "Gender.Code", "Race", "population_proportion", "deaths_proportion", "Group_Population", "State_Population", "Group_Deaths", "State_Deaths"))
 ```
 
 ```{r}
-#White mortaltity
+#White mortality
 
 white_male_mort <- mort_state_race %>% 
   filter(Race == "White", Gender.Code == "M") %>% 
   group_by(State, Year) %>% 
   mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), white_male_mortality = (Group_Deaths/State_Population) * 100000, white_male_mortality_weighted = (white_male_mortality/population_proportion), white_male_mortlaity_weighted2 = (white_male_mortality*deaths_proportion))
 
-white_female_mortality <- mort_state_race %>% 
+white_female_mort <- mort_state_race %>% 
   filter(Race == "White", Gender.Code == "F") %>% 
   group_by(State, Year) %>% 
-  mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), white_female_mortality = (Group_Deaths/State_Poppulation) * 100000, white_female_mortality_weighted = white_female_mortality/population_proportion, white_female_mortality_weighted2 = white_female_mortality*death_proportion)
+  mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), white_female_mortality = (Group_Deaths/State_Population) * 100000, white_female_mortality_weighted = white_female_mortality/population_proportion, white_female_mortality_weighted2 = white_female_mortality*deaths_proportion)
+
+white_mort <- white_male_mort %>% 
+  full_join(white_female_mort, by = c("State", "Year", "Gender.Code", "Race", "population_proportion", "deaths_proportion", "Group_Population", "State_Population", "Group_Deaths", "State_Deaths"))
 ```
 
 ```{r}
 #Hispanic mortality
+hispanic_male_mort <- mort_state_race %>% 
+  filter(Race == "Hispanic or Latino", Gender.Code == "M") %>%
+  group_by(State, Year) %>% 
+  mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), hispanic_male_mortality = (Group_Deaths/State_Population) * 100000, hispanic_male_mortality_weighted = hispanic_male_mortality/population_proportion, hispanic_male_mortality_weighted2 = hispanic_male_mortality*deaths_proportion)
 
+hispanic_female_mort <- mort_state_race %>% 
+  filter(Race == "Hispanic or Latino", Gender.Code == "F") %>% 
+  group_by(State, Year) %>% 
+  mutate(population_proportion = (Group_Population/State_Population), deaths_proportion = (Group_Deaths/State_Deaths), hispanic_female_mortality = (Group_Deaths/State_Population) * 100000, hispanic_female_mortality_weighted = hispanic_female_mortality/population_proportion, hispanic_female_mortality_weighted2 = hispanic_female_mortality*deaths_proportion)
+
+hispanic_mort <- hispanic_male_mort %>% 
+  full_join(hispanic_female_mort, by = c("State", "Year", "Gender.Code", "Race", "population_proportion", "deaths_proportion", "Group_Population", "State_Population", "Group_Deaths", "State_Deaths"))
+```
+
+#Join everything back together
+```{r}
+full_morts <- black_mort %>% 
+  full_join(hispanic_mort, by = c("State", "Year", "Gender.Code", "Race", "population_proportion", "deaths_proportion", "Group_Population", "State_Population", "Group_Deaths", "State_Deaths"))
+
+full_morts <- full_morts %>% 
+  full_join(white_mort, by = c("State", "Year", "Gender.Code", "Race", "population_proportion", "deaths_proportion", "Group_Population", "State_Population", "Group_Deaths", "State_Deaths"))
+```
+
+```{r}
+export(full_morts, "full_morts.csv")
 ```
 
