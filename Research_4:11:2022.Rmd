@@ -1,0 +1,78 @@
+---
+title: "Research 4/11"
+author: "Grace Rade"
+date: "4/11/2022"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(rio)
+cod_white_female <- read.delim('cod_white_female_1999-2020.txt')
+cod_white_male <- read.delim('cod_white_male_1999-2020.txt')
+cod_black_female <- read.delim('cod_black_female_1999-2020.txt')
+cod_black_male <- read.delim('cod_black_male_1999-2020.txt')
+cod_hispanic_female <- read.delim('cod_hispanic_female_1999-2020.txt')
+cod_hispanic_male <- read.delim('cod_hispanic_male_1999-2020.txt')
+```
+
+* instead of state, this is by census region
+
+## Black COD
+
+```{r}
+black_male <- cod_black_male %>% 
+  group_by(Census.Region, Year) %>% 
+  mutate(black_male_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, black_male_mort_rate)
+
+black_female <- cod_black_female %>% 
+  group_by(Census.Region, Year) %>% 
+  mutate(black_female_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, black_female_mort_rate)
+
+black <- black_male %>% 
+  full_join(black_female, by = c("Census.Region", "Year", "Cause_of_Death"))
+```
+
+
+## Hispanic COD
+
+```{r}
+hispanic_male <- cod_hispanic_male %>% 
+  group_by(Census.Region, Year) %>% 
+  mutate(hispanic_male_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, hispanic_male_mort_rate)
+
+hispanic_female <- cod_hispanic_female %>% 
+  group_by(Census.Region, Year) %>% 
+  mutate(hispanic_female_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, hispanic_female_mort_rate)
+
+hispanic <- hispanic_male %>% 
+  full_join(hispanic_female, by = c("Census.Region", "Year", "Cause_of_Death"))
+```
+
+## White COD
+
+```{r}
+white_male <- cod_white_male %>% 
+  group_by(Census.Region, Year) %>% 
+  mutate(white_male_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, white_male_mort_rate)
+
+white_female <- cod_white_female %>%
+  group_by(Census.Region, Year) %>% 
+  mutate(white_female_mort_rate = (Deaths/Population) * 100000) %>% 
+  rename(Cause_of_Death = ICD.10.113.Cause.List) %>% 
+  select(Census.Region, Year, Cause_of_Death, white_female_mort_rate)
+
+white <- white_male %>% 
+  full_join(white_female, by = c("Census.Region", "Year", "Cause_of_Death")) 
+```
+
+
